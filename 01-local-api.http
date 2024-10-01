@@ -16,5 +16,8 @@ Content-Type: application/json
   ]
 }
 
-###
+### Post external JSON
+POST http://localhost:11434/v1/chat/completions
+Content-Type: application/json
 
+< ./01-local-api-01.json
