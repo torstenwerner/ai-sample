@@ -1,0 +1,20 @@
+### A simple chat prompt
+POST http://localhost:11434/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "llama3.1:latest",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "What is a LLM?"
+    }
+  ]
+}
+
+###
+
