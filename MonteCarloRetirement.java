@@ -58,5 +58,10 @@ public class MonteCarloRetirement {
         System.out.printf("50%% last year: %2d%n", lastYears[repetitions / 2]);
         System.out.printf("90%% last year: %2d%n", lastYears[repetitions * 9 / 10]);
         System.out.printf("99%% last year: %2d%n", lastYears[repetitions * 99 / 100]);
+        
+        final long failedRepetitions = Arrays.stream(lastYears)
+                .filter(lastYear -> lastYear < years)
+                .count();
+        System.out.printf("failure ratio: %2.1f%%%n", 100. * failedRepetitions / repetitions);
     }
 }
