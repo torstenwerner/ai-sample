@@ -8,9 +8,9 @@ public class MonteCarloRetirement {
         double mu = 0.08;    // Erwartete jährliche Rendite (8%) S&P 500
         double sigma = 0.18; // Jährliche Standardabweichung (18%)
         int years = 30; 
-        int repetitions = 10_000;
+        int repetitions = 100_000;
         double startValue = 1000000;
-        double startWithdrawal = 40000;
+        double startWithdrawal = 50000;
         double inflationRate = 0.03;
         int yearsBeforeRetirement = 8; // Jahre vor Rente
         double retirementIncomePart = 0.5; // Rentenhöhe 50^
