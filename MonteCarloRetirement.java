@@ -12,6 +12,8 @@ public class MonteCarloRetirement {
         double startValue = 1000000;
         double startWithdrawal = 40000;
         double inflationRate = 0.03;
+        int yearsBeforeRetirement = 8; // Jahre vor Rente
+        double retirementIncomePart = 0.5; // Rentenhöhe 50^
 
         double[] endValues = new double[repetitions];
         int[] lastYears = new int[repetitions];
@@ -24,8 +26,10 @@ public class MonteCarloRetirement {
             double withdrawal = startWithdrawal;
             lastYears[i] = years;
             for (int year = 0; year < years; year++) {
-                // withdrawal at the start of the year 
-                value -= withdrawal;
+                boolean isRetired = year >= yearsBeforeRetirement;
+                // withdrawal at the start of the year
+                double incomePart = isRetired ? retirementIncomePart : 0;
+                value -= withdrawal * (1 - incomePart);
                 if (lastYears[i] == years && value < 0) {
                     lastYears[i] = year;
                 }
