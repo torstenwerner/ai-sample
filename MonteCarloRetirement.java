@@ -14,6 +14,7 @@ public class MonteCarloRetirement {
         double inflationRate = 0.03;
 
         double[] endValues = new double[repetitions];
+        int[] lastYears = new int[repetitions];
 
         Random random = new Random();
         // random.setSeed(12345L);
@@ -21,9 +22,13 @@ public class MonteCarloRetirement {
         for (int i = 0; i < repetitions; i++) {
             double value = startValue;
             double withdrawal = startWithdrawal;
+            lastYears[i] = years;
             for (int year = 0; year < years; year++) {
                 // withdrawal at the start of the year 
                 value -= withdrawal;
+                if (lastYears[i] == years && value < 0) {
+                    lastYears[i] = year;
+                }
                 // return at the end of the year
                 double returnRate = mu + sigma * random.nextGaussian();
                 value *= 1.0 + returnRate;
@@ -36,10 +41,18 @@ public class MonteCarloRetirement {
         Arrays.sort(endValues);
 
         DecimalFormat df = new DecimalFormat("#,###");
-        System.out.printf(" 1%%: %10s%n", df.format(endValues[repetitions / 100]));
-        System.out.printf("10%%: %10s%n", df.format(endValues[repetitions / 10]));
-        System.out.printf("50%%: %10s%n", df.format(endValues[repetitions / 2]));
-        System.out.printf("90%%: %10s%n", df.format(endValues[repetitions * 9 / 10]));
-        System.out.printf("99%%: %10s%n", df.format(endValues[repetitions * 99 / 100]));
+        System.out.printf(" 1%% end value: %10s%n", df.format(endValues[repetitions / 100]));
+        System.out.printf("10%% end value: %10s%n", df.format(endValues[repetitions / 10]));
+        System.out.printf("50%% end value: %10s%n", df.format(endValues[repetitions / 2]));
+        System.out.printf("90%% end value: %10s%n", df.format(endValues[repetitions * 9 / 10]));
+        System.out.printf("99%% end value: %10s%n", df.format(endValues[repetitions * 99 / 100]));
+        
+        Arrays.sort(lastYears);
+        
+        System.out.printf(" 1%% last year: %2d%n", lastYears[repetitions / 100]);
+        System.out.printf("10%% last year: %2d%n", lastYears[repetitions / 10]);
+        System.out.printf("50%% last year: %2d%n", lastYears[repetitions / 2]);
+        System.out.printf("90%% last year: %2d%n", lastYears[repetitions * 9 / 10]);
+        System.out.printf("99%% last year: %2d%n", lastYears[repetitions * 99 / 100]);
     }
 }
