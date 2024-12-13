@@ -2,15 +2,15 @@ import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Arrays;
 
-public class SP500MonteCarlo {
+public class MonteCarloRetirement {
 
     public static void main(String[] args) {
-        double mu = 0.08;    // Erwartete jährliche Rendite (8%)
+        double mu = 0.08;    // Erwartete jährliche Rendite (8%) S&P 500
         double sigma = 0.18; // Jährliche Standardabweichung (18%)
         int years = 30; 
         int repetitions = 10_000;
         double startValue = 1000000;
-        double withdrawalRate = 0.04;
+        double withdrawal = 40000;
 
         double[] endValues = new double[repetitions];
 
@@ -21,7 +21,7 @@ public class SP500MonteCarlo {
             double value = startValue;
             for (int year = 0; year < years; year++) {
                 // withdrawal at the start of the year 
-                value -= withdrawalRate * startValue;
+                value -= withdrawal;
                 // return at the end of the year
                 double returnRate = mu + sigma * random.nextGaussian();
                 value *= 1.0 + returnRate;
