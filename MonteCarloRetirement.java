@@ -10,7 +10,8 @@ public class MonteCarloRetirement {
         int years = 30; 
         int repetitions = 10_000;
         double startValue = 1000000;
-        double withdrawal = 40000;
+        double startWithdrawal = 40000;
+        double inflationRate = 0.03;
 
         double[] endValues = new double[repetitions];
 
@@ -19,12 +20,15 @@ public class MonteCarloRetirement {
 
         for (int i = 0; i < repetitions; i++) {
             double value = startValue;
+            double withdrawal = startWithdrawal;
             for (int year = 0; year < years; year++) {
                 // withdrawal at the start of the year 
                 value -= withdrawal;
                 // return at the end of the year
                 double returnRate = mu + sigma * random.nextGaussian();
                 value *= 1.0 + returnRate;
+                // inflation
+                withdrawal *= 1.0 + inflationRate;
             }
             endValues[i] = value;
         }
