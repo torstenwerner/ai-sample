@@ -13,7 +13,8 @@ public class MonteCarloRetirement {
         double startWithdrawal = 50000;
         double inflationRate = 0.03;
         int yearsBeforeRetirement = 8; // Jahre vor Rente
-        double retirementIncomePart = 0.5; // Rentenhöhe 50^
+        double retirementIncomePart = 0.5; // Rentenhöhe 50%
+        double withdrawalReductionFactor = 0.1; // Ausgabenreduktion 10% in schlechten Zeiten 
 
         double[] endValues = new double[repetitions];
         int[] lastYears = new int[repetitions];
@@ -26,15 +27,16 @@ public class MonteCarloRetirement {
             double withdrawal = startWithdrawal;
             lastYears[i] = years;
             for (int year = 0; year < years; year++) {
+                double returnRate = mu + sigma * random.nextGaussian();
+                double withdrawalReduction = returnRate < 0 ? withdrawalReductionFactor * withdrawal : 0;
                 boolean isRetired = year >= yearsBeforeRetirement;
                 // withdrawal at the start of the year
                 double incomePart = isRetired ? retirementIncomePart : 0;
-                value -= withdrawal * (1 - incomePart);
+                value += -withdrawal  + withdrawalReduction + incomePart * withdrawal;
                 if (lastYears[i] == years && value < 0) {
                     lastYears[i] = year;
                 }
                 // return at the end of the year
-                double returnRate = mu + sigma * random.nextGaussian();
                 value *= 1.0 + returnRate;
                 // inflation
                 withdrawal *= 1.0 + inflationRate;
