@@ -25,18 +25,10 @@ public class SP500MonteCarlo {
 
         Arrays.sort(endValues);
 
-        double median = endValues[repetitions / 2];
-        double lowQuartile = endValues[repetitions / 4];
-        double highQuartile = endValues[3 * repetitions / 4];
-
-        System.out.println("median: " + median);
-        System.out.println("low quartile (25%): " + lowQuartile);
-        System.out.println("high quartile (75%): " + highQuartile);
-
-        double min = endValues[0];
-        double max = endValues[endValues.length - 1];
-
-        System.out.println("min: " + min);
-        System.out.println("max: " + max);
+        System.out.printf(" 1%%: %10.4f%n", endValues[repetitions / 100]);
+        System.out.printf("10%%: %10.4f%n", endValues[repetitions / 10]);
+        System.out.printf("50%%: %10.4f%n", endValues[repetitions / 2]);
+        System.out.printf("90%%: %10.4f%n", endValues[repetitions * 9 / 10]);
+        System.out.printf("99%%: %10.4f%n", endValues[repetitions * 99 / 100]);
     }
 }
