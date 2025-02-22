@@ -1,23 +1,44 @@
 # Summarizes a YouTube video in file final-summary.md.
 # Writes additional files transcript.txt, summary.md, and title.md.
+# Caches the transcripts in the sqlite database youtube-transcript.db.
 
 import json
-
+import sqlite3
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id:
-video_id = "1CIpzeNxIhU"
+video_id = "-lz30by8-sU"
 model = "llama3.2"
 max_length = 1024
 
+def open_database():
+    conn = sqlite3.connect('youtube-transcript.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transcript (
+            id TEXT NOT NULL,
+            transcript TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    return conn, cursor
 
-def fetch_youtube_transcript(video_id):
-    transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    full_text = " ".join(entry["text"] for entry in transcript)
+def fetch_youtube_transcript():
+    conn, cursor = open_database()
+    cursor.execute("SELECT t.id, t.transcript FROM transcript t where t.id = ?", (video_id,))
+    row = cursor.fetchone()
+    if row is not None:
+        full_text = row[1]
+    else:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        full_text = " ".join(entry["text"] for entry in transcript)
+        cursor.execute("INSERT INTO transcript VALUES (?, ?)", (video_id, full_text))
+        conn.commit()
     with open("transcript.txt", "w") as output_file:
         output_file.write(full_text)
+    conn.close()
 
 
 def summarize_text(input_filename, prompt, output_filename):
@@ -55,7 +76,7 @@ def write_final_summary():
         final_summary_file.write(full_summary)
 
 
-fetch_youtube_transcript(video_id)
+fetch_youtube_transcript()
 summarize_text("transcript.txt", "Summarize the following text", "summary.md")
 summarize_text("summary.md", "Summarize the following text as one sentence. Output the summary only.", "title.md")
 write_final_summary()
