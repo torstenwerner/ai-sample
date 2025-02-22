@@ -16,7 +16,7 @@ Content-Type: application/json
   ]
 }
 
-### Post external JSON
+### Post external JSON to Ollama
 POST http://localhost:11434/v1/chat/completions
 Content-Type: application/json
 
@@ -27,3 +27,30 @@ POST http://localhost:11434/api/generate
 Content-Type: application/json
 
 < ./01-local-api-02.json
+
+### Get LM Studio models
+GET http://localhost:1234/v1/models
+
+### Simple LM Studio test
+POST http://localhost:1234/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "mistral-nemo-instruct-2407",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "What is a LLM?"
+    }
+  ]
+}
+
+### Post external JSON to LM Studio
+POST http://localhost:1234/v1/chat/completions
+Content-Type: application/json
+
+< ./01-local-api-01.json

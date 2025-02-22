@@ -12,9 +12,15 @@ from youtube_transcript_api import YouTubeTranscriptApi
 # The most important is the YouTube video id and the language code:
 video_id = "qwLAs_K0aeA"
 language = "de"
-model = "llama3.1"
+# Ollama
+# url = "http://localhost:11434/v1/chat/completions"
+# LM Studio
+url = "http://localhost:1234/v1/chat/completions"
+# model = "llama3.1"
+model = "mistral-nemo-instruct-2407"
+# model = "deepseek-r1-distill-qwen-1.5b"
 max_transcript_length = 8 * 1024
-max_summary_length = 1024
+# max_summary_length = 1024
 prompts = {
     "en": {
         "summary": "Summarize the following text. Output the summary only.",
@@ -60,25 +66,24 @@ def summarize_text(input_filename, prompt_selector, output_filename):
     with open(input_filename, "r") as input_file:
         input_text = input_file.read(max_transcript_length)
 
-    url = "http://localhost:11434/api/generate"
-
     prefix = prompts[language][prompt_selector]
     prompt = f":{prefix}\n\n{input_text}"
 
     request = {
         "model": model,
-        "prompt": prompt,
-        "stream": False,
-        "options": {
-            "num_predict": max_summary_length
-        }
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     }
 
     response = requests.post(url, json=request)
     response.raise_for_status()
 
     json_result = json.loads(response.text)
-    summary_text = json_result.get("response", "").strip()
+    summary_text = json_result.get("choices")[0].get("message").get("content")
     with open(output_filename, "w") as output_file:
         output_file.write(summary_text)
 
