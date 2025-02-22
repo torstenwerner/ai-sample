@@ -1,9 +1,15 @@
-# Summarizes a text file
+# Summarizes a YouTube video. Writes files transcript.txt, summary1.md, and summary2.md.
 
 import json
 
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
+
+# Some constants you might want to adapt.
+# The most important is the YouTube video id:
+video_id = "KcSXcpluDe4"
+model = "llama3.2"
+max_length = 1024
 
 
 def fetch_youtube_transcript(video_id):
@@ -18,9 +24,7 @@ def summarize_text(input_filename, prompt, output_filename):
         input_text = input_file.read()
 
     url = "http://localhost:11434/api/generate"
-    model = "llama3.2"
     prompt = f":{prompt}\n\n{input_text}"
-    max_length = 1024
 
     request = {
         "model": model,
@@ -40,6 +44,6 @@ def summarize_text(input_filename, prompt, output_filename):
         output_file.write(summary_text)
 
 
-# fetch_youtube_transcript("KcSXcpluDe4")
+fetch_youtube_transcript(video_id)
 summarize_text("transcript.txt", "Summarize the following text", "summary1.md")
 summarize_text("summary1.md", "Summarize the following text as one sentence. Output the summary only.", "summary2.md")
