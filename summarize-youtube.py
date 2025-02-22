@@ -9,11 +9,22 @@ import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
-# The most important is the YouTube video id:
-video_id = "SmZmBKc7Lrs"
+# The most important is the YouTube video id and the language code:
+video_id = "qwLAs_K0aeA"
+language = "de"
 model = "llama3.2"
 max_transcript_length = 8 * 1024
 max_summary_length = 1024
+prompts = {
+    "en": {
+        "summary": "Summarize the following text. Output the summary only.",
+        "title": "Summarize the following text as one sentence. Output the summary only."
+    },
+    "de": {
+        "summary": "Fasse den folgenden Text zusammen. Antworte nur mit der Zusammenfassung.",
+        "title": "Fasse den folgenden Text in einem Satz zusammen. Antworte nur mit der Zusammenfassung."
+    }
+}
 
 
 def open_database():
@@ -36,7 +47,7 @@ def fetch_youtube_transcript():
     if row is not None:
         full_text = row[1]
     else:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language])
         full_text = " ".join(entry["text"] for entry in transcript)
         cursor.execute("INSERT INTO transcript VALUES (?, ?)", (video_id, full_text))
         conn.commit()
@@ -45,12 +56,14 @@ def fetch_youtube_transcript():
     conn.close()
 
 
-def summarize_text(input_filename, prompt, output_filename):
+def summarize_text(input_filename, prompt_selector, output_filename):
     with open(input_filename, "r") as input_file:
         input_text = input_file.read(max_transcript_length)
 
     url = "http://localhost:11434/api/generate"
-    prompt = f":{prompt}\n\n{input_text}"
+
+    prefix = prompts[language][prompt_selector]
+    prompt = f":{prefix}\n\n{input_text}"
 
     request = {
         "model": model,
@@ -80,7 +93,7 @@ def write_final_summary():
         final_summary_file.write(full_summary)
 
 
-# fetch_youtube_transcript()
-summarize_text("transcript.txt", "Summarize the following text without adding adding additional hints.", "summary.md")
-summarize_text("summary.md", "Summarize the following text as one sentence. Output the summary only.", "title.md")
+fetch_youtube_transcript()
+summarize_text("transcript.txt", "summary", "summary.md")
+summarize_text("summary.md", "title", "title.md")
 write_final_summary()
