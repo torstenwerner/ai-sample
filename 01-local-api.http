@@ -1,4 +1,4 @@
-### A simple chat prompt
+### Simple ollama test
 POST http://localhost:11434/v1/chat/completions
 Content-Type: application/json
 
@@ -21,3 +21,9 @@ POST http://localhost:11434/v1/chat/completions
 Content-Type: application/json
 
 < ./01-local-api-01.json
+
+### Post to generate URL
+POST http://localhost:11434/api/generate
+Content-Type: application/json
+
+< ./01-local-api-02.json

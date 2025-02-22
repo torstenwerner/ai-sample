@@ -27,8 +27,7 @@ def summarize_text(input_filename, prompt, output_filename):
         "prompt": prompt,
         "stream": False,
         "options": {
-            "num_predict": max_length,
-            "temperature": 0.7
+            "num_predict": max_length
         }
     }
 

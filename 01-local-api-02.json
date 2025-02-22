@@ -1,0 +1,9 @@
+{
+  "model": "llama3.2",
+  "prompt": "Fasse den folgenden Text zusammen:\n\nThis is a transcript of a discussion about the concept of embedding images and text into a shared space, allowing for tasks such as image classification and generation. The speaker explains how this process works and its applications, including image synthesis and natural language processing.\n\nThe key points from the discussion include:\n\n1. **Image embeddings**: The idea of representing images as vectors in a high-dimensional space, where similar images are closer together.u\n2. **Text embeddings**: Representing text as vectors in a high-dimensional space, allowing for tasks such as sentiment analysis and text classification.\n3. **Scalability**: Training models on large datasets is essential for achieving good performance, especially when it comes to image synthesis and generation.\n4. **Noise injection**: Adding noise to an image or text can help the model learn to generalize and improve its performance over time.\n5. **Generalizability**: The goal of training a model to be able to handle a wide range of inputs and tasks, rather than just a specific narrow task.\n\nThe speaker also mentions that this process requires careful tuning and optimization, as well as large amounts of data to train on. They highlight the importance of stability diffusion and DALL-E, two models that have been trained on massive datasets to achieve impressive results in image synthesis and generation.\n\nOverall, this discussion provides a high-level overview of the concepts and techniques involved in embedding images and text into a shared space, and how these can be applied to various tasks such as image classification, generation, and natural language processing.\n\n",
+  "stream": false,
+  "options": {
+    "num_predict": 1024,
+    "temperature": 0.7
+  }
+}
