@@ -12,7 +12,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 # The most important is the YouTube video id and the language code:
 video_id = "qwLAs_K0aeA"
 language = "de"
-model = "llama3.2"
+model = "llama3.1"
 max_transcript_length = 8 * 1024
 max_summary_length = 1024
 prompts = {
