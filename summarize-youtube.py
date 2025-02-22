@@ -10,14 +10,16 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id and the language code:
-video_id = "qwLAs_K0aeA"
-language = "de"
+video_id = "nczJ58WvtYo"
+# e.g. "en" or "de"
+language = "en"
 # Ollama
-# url = "http://localhost:11434/v1/chat/completions"
+url = "http://localhost:11434/v1/chat/completions"
 # LM Studio
-url = "http://localhost:1234/v1/chat/completions"
+# url = "http://localhost:1234/v1/chat/completions"
 # model = "llama3.1"
-model = "mistral-nemo-instruct-2407"
+model = "llama3.2"
+# model = "mistral-nemo-instruct-2407"
 # model = "deepseek-r1-distill-qwen-1.5b"
 max_transcript_length = 8 * 1024
 # max_summary_length = 1024
