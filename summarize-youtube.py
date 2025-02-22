@@ -3,9 +3,11 @@
 # Caches the transcripts in the sqlite database youtube-transcript.db.
 
 import json
+import os
 import sqlite3
 
 import requests
+from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
@@ -14,11 +16,14 @@ video_id = "nczJ58WvtYo"
 # e.g. "en" or "de"
 language = "en"
 # Ollama
-url = "http://localhost:11434/v1/chat/completions"
+# url = "http://localhost:11434/v1/chat/completions"
+# OpenAI
+url = "https://api.openai.com/v1/chat/completions"
 # LM Studio
 # url = "http://localhost:1234/v1/chat/completions"
 # model = "llama3.1"
-model = "llama3.2"
+# model = "llama3.2"
+model = "gpt-4o-mini"
 # model = "mistral-nemo-instruct-2407"
 # model = "deepseek-r1-distill-qwen-1.5b"
 max_transcript_length = 8 * 1024
@@ -33,6 +38,8 @@ prompts = {
         "title": "Fasse den folgenden Text in einem Satz zusammen. Antworte nur mit der Zusammenfassung."
     }
 }
+
+load_dotenv()
 
 
 def open_database():
@@ -81,7 +88,8 @@ def summarize_text(input_filename, prompt_selector, output_filename):
         ]
     }
 
-    response = requests.post(url, json=request)
+    api_key = os.getenv("OPENAI_API_KEY")
+    response = requests.post(url, json=request, headers={"Authorization": f"Bearer {api_key}"})
     response.raise_for_status()
 
     json_result = json.loads(response.text)
