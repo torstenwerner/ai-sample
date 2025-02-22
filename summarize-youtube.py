@@ -4,14 +4,17 @@
 
 import json
 import sqlite3
+
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id:
-video_id = "-lz30by8-sU"
+video_id = "SmZmBKc7Lrs"
 model = "llama3.2"
-max_length = 1024
+max_transcript_length = 8 * 1024
+max_summary_length = 1024
+
 
 def open_database():
     conn = sqlite3.connect('youtube-transcript.db')
@@ -24,6 +27,7 @@ def open_database():
     ''')
     conn.commit()
     return conn, cursor
+
 
 def fetch_youtube_transcript():
     conn, cursor = open_database()
@@ -43,7 +47,7 @@ def fetch_youtube_transcript():
 
 def summarize_text(input_filename, prompt, output_filename):
     with open(input_filename, "r") as input_file:
-        input_text = input_file.read()
+        input_text = input_file.read(max_transcript_length)
 
     url = "http://localhost:11434/api/generate"
     prompt = f":{prompt}\n\n{input_text}"
@@ -53,7 +57,7 @@ def summarize_text(input_filename, prompt, output_filename):
         "prompt": prompt,
         "stream": False,
         "options": {
-            "num_predict": max_length
+            "num_predict": max_summary_length
         }
     }
 
@@ -76,7 +80,7 @@ def write_final_summary():
         final_summary_file.write(full_summary)
 
 
-fetch_youtube_transcript()
-summarize_text("transcript.txt", "Summarize the following text", "summary.md")
+# fetch_youtube_transcript()
+summarize_text("transcript.txt", "Summarize the following text without adding adding additional hints.", "summary.md")
 summarize_text("summary.md", "Summarize the following text as one sentence. Output the summary only.", "title.md")
 write_final_summary()
