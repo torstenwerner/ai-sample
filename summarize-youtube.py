@@ -1,4 +1,5 @@
-# Summarizes a YouTube video. Writes files transcript.txt, summary1.md, and summary2.md.
+# Summarizes a YouTube video in file final-summary.md.
+# Writes additional files transcript.txt, summary.md, and title.md.
 
 import json
 
@@ -7,7 +8,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id:
-video_id = "KcSXcpluDe4"
+video_id = "1CIpzeNxIhU"
 model = "llama3.2"
 max_length = 1024
 
@@ -44,6 +45,17 @@ def summarize_text(input_filename, prompt, output_filename):
         output_file.write(summary_text)
 
 
+def write_final_summary():
+    with open("summary.md", "r") as summary_file:
+        summary_text = summary_file.read()
+    with open("title.md", "r") as title_file:
+        title_text = title_file.read()
+    full_summary = f"# Summarizing YouTube videos\n\nvideo URL: https://www.youtube.com/watch?v={video_id}\n\n## Title\n\n{title_text}\n\n## Summary\n\n{summary_text}"
+    with open("final-summary.md", "w") as final_summary_file:
+        final_summary_file.write(full_summary)
+
+
 fetch_youtube_transcript(video_id)
-summarize_text("transcript.txt", "Summarize the following text", "summary1.md")
-summarize_text("summary1.md", "Summarize the following text as one sentence. Output the summary only.", "summary2.md")
+summarize_text("transcript.txt", "Summarize the following text", "summary.md")
+summarize_text("summary.md", "Summarize the following text as one sentence. Output the summary only.", "title.md")
+write_final_summary()
