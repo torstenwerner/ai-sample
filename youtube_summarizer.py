@@ -118,3 +118,9 @@ class YouTubeSummarizer:
         full_summary = f"# Summarizing YouTube videos\n\nvideo URL: https://www.youtube.com/watch?v={self.video_id}\n\n## Title\n\n{title_text}\n\n## Summary\n\n{summary_text}"
         with open("final-summary.md", "w") as final_summary_file:
             final_summary_file.write(full_summary)
+
+    def summarize(self):
+        self.fetch_transcript()
+        self.summarize_text("transcript.txt", "summary", "summary.md")
+        self.summarize_text("summary.md", "title", "title.md")
+        self.write_final_summary()
