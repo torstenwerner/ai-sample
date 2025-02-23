@@ -39,6 +39,9 @@ class YouTubeSummarizer:
         self.language = None
         self.conn = None
         self.cursor = None
+        self.transcript_text = None
+        self.summary_text = None
+        self.title_text = None
 
     def open_database(self):
         self.conn = sqlite3.connect('youtube-transcript.db')
@@ -64,25 +67,20 @@ class YouTubeSummarizer:
         row = self.cursor.fetchone()
         if row is not None:
             self.language = row[1]
-            full_text = row[2]
+            self.transcript_text = row[2]
         else:
             transcript = self.fetch_youtube_transcript()
             if transcript is not None:
                 self.language = transcript.language_code
                 entries = transcript.fetch()
-                full_text = " ".join(entry["text"] for entry in entries)
-                self.cursor.execute("INSERT INTO transcript VALUES (?, ?, ?)", (self.video_id, self.language, full_text))
+                self.transcript_text = " ".join(entry["text"] for entry in entries)
+                self.cursor.execute("INSERT INTO transcript VALUES (?, ?, ?)", (self.video_id, self.language, self.transcript_text))
                 self.conn.commit()
             else:
                 raise Exception("transcript not found")
-        with open("transcript.txt", "w") as output_file:
-            output_file.write(full_text)
         self.conn.close()
 
-    def summarize_text(self, input_filename, prompt_selector, output_filename):
-        with open(input_filename, "r") as input_file:
-            input_text = input_file.read(self.max_transcript_length)
-
+    def summarize_text(self, input_text, prompt_selector):
         prefix = self.prompts[self.language][prompt_selector]
         prompt = f":{prefix}\n\n{input_text}"
 
@@ -106,21 +104,15 @@ class YouTubeSummarizer:
         response.raise_for_status()
 
         json_result = json.loads(response.text)
-        summary_text = json_result.get("choices")[0].get("message").get("content")
-        with open(output_filename, "w") as output_file:
-            output_file.write(summary_text)
+        return json_result.get("choices")[0].get("message").get("content")
 
     def write_final_summary(self):
-        with open("summary.md", "r") as summary_file:
-            summary_text = summary_file.read()
-        with open("title.md", "r") as title_file:
-            title_text = title_file.read()
-        full_summary = f"# Summarizing YouTube videos\n\nvideo URL: https://www.youtube.com/watch?v={self.video_id}\n\n## Title\n\n{title_text}\n\n## Summary\n\n{summary_text}"
+        full_summary = f"# Summarizing YouTube videos\n\nvideo URL: https://www.youtube.com/watch?v={self.video_id}\n\n## Title\n\n{self.title_text}\n\n## Summary\n\n{self.summary_text}"
         with open("final-summary.md", "w") as final_summary_file:
             final_summary_file.write(full_summary)
 
     def summarize(self):
         self.fetch_transcript()
-        self.summarize_text("transcript.txt", "summary", "summary.md")
-        self.summarize_text("summary.md", "title", "title.md")
+        self.summary_text = self.summarize_text(self.transcript_text, "summary")
+        self.title_text = self.summarize_text(self.summary_text, "title")
         self.write_final_summary()
