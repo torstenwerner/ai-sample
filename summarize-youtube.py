@@ -12,9 +12,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id and the language code:
-video_id = "jNC9LPc3BI0"
-# e.g. "en" or "de"
-language = "en"
+video_id = "NKYxdzSNqzE"
 # Ollama
 # url = "http://localhost:11434/v1/chat/completions"
 # OpenAI
@@ -40,6 +38,7 @@ prompts = {
 }
 
 load_dotenv()
+global language
 
 
 def open_database():
@@ -48,6 +47,7 @@ def open_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS transcript (
             id TEXT NOT NULL,
+            language TEXT NOT NULL,
             transcript TEXT NOT NULL
         )
     ''')
@@ -56,16 +56,30 @@ def open_database():
 
 
 def fetch_youtube_transcript():
+    transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+    for transcript in transcripts:
+        if transcript.is_generated and transcript.language_code in ['en', 'de']:
+            return transcript
+
+
+def fetch_transcript():
     conn, cursor = open_database()
-    cursor.execute("SELECT t.id, t.transcript FROM transcript t where t.id = ?", (video_id,))
+    cursor.execute("SELECT t.id, t.language, t.transcript FROM transcript t where t.id = ?", (video_id,))
     row = cursor.fetchone()
+    global language
     if row is not None:
-        full_text = row[1]
+        language = row[1]
+        full_text = row[2]
     else:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language])
-        full_text = " ".join(entry["text"] for entry in transcript)
-        cursor.execute("INSERT INTO transcript VALUES (?, ?)", (video_id, full_text))
-        conn.commit()
+        transcript = fetch_youtube_transcript()
+        if transcript is not None:
+            language = transcript.language_code
+            entries = transcript.fetch()
+            full_text = " ".join(entry["text"] for entry in entries)
+            cursor.execute("INSERT INTO transcript VALUES (?, ?, ?)", (video_id, language, full_text))
+            conn.commit()
+        else:
+            raise Exception("transcript not found")
     with open("transcript.txt", "w") as output_file:
         output_file.write(full_text)
     conn.close()
@@ -108,7 +122,7 @@ def write_final_summary():
         final_summary_file.write(full_summary)
 
 
-fetch_youtube_transcript()
+fetch_transcript()
 summarize_text("transcript.txt", "summary", "summary.md")
 summarize_text("summary.md", "title", "title.md")
 write_final_summary()
