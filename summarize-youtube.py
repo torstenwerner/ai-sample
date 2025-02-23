@@ -5,4 +5,4 @@
 from youtube_summarizer import YouTubeSummarizer
 
 # specify YouTube video id
-YouTubeSummarizer("O5xeyoRL95U").summarize()
+YouTubeSummarizer("bq1Plo2RhYI").summarize()

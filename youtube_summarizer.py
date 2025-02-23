@@ -8,6 +8,9 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 
 class YouTubeSummarizer:
+    """
+    Summarizes transcripts of YouTube videos.
+    """
     # Some constants you might want to adapt.
     # Ollama
     # url = "http://localhost:11434/v1/chat/completions"
@@ -34,7 +37,10 @@ class YouTubeSummarizer:
 
     load_dotenv()
 
-    def __init__(self, video_id):
+    def __init__(self, video_id: str):
+        """
+        :param video_id: identifies the video at YouTube
+        """
         self.video_id = video_id
         self.language = None
         self.conn = None
@@ -80,7 +86,7 @@ class YouTubeSummarizer:
                 raise Exception("transcript not found")
         self.conn.close()
 
-    def summarize_text(self, input_text, prompt_selector):
+    def summarize_text(self, input_text: str, prompt_selector: str):
         prefix = self.prompts[self.language][prompt_selector]
         prompt = f":{prefix}\n\n{input_text}"
 
@@ -112,6 +118,9 @@ class YouTubeSummarizer:
             final_summary_file.write(full_summary)
 
     def summarize(self):
+        """
+        Summarizes the transcript and writes it into a file final-summary.md.
+        """
         self.fetch_transcript()
         self.summary_text = self.summarize_text(self.transcript_text, "summary")
         self.title_text = self.summarize_text(self.summary_text, "title")
