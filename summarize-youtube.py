@@ -28,12 +28,12 @@ max_transcript_length = 16 * 1024
 # max_summary_length = 1024
 prompts = {
     "en": {
-        "summary": "Summarize the following text. Output the summary only.",
-        "title": "Summarize the following text as one sentence. Output the summary only."
+        "summary": "",
+        "title": "Summarize as one sentence:"
     },
     "de": {
-        "summary": "Fasse den folgenden Text zusammen. Antworte nur mit der Zusammenfassung.",
-        "title": "Fasse den folgenden Text in einem Satz zusammen. Antworte nur mit der Zusammenfassung."
+        "summary": "Fasse in deutscher Sprache zusammen.",
+        "title": "Fasse in einem Satz in deutscher Sprache zusammen."
     }
 }
 
@@ -95,6 +95,10 @@ def summarize_text(input_filename, prompt_selector, output_filename):
     request = {
         "model": model,
         "messages": [
+            {
+                "role": "developer",
+                "content": "You are summarizing video transcripts. You answer with the summary only and do not mention the source."
+            },
             {
                 "role": "user",
                 "content": prompt
