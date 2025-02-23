@@ -12,7 +12,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 # Some constants you might want to adapt.
 # The most important is the YouTube video id and the language code:
-video_id = "PpaQrzoDW2I"
+video_id = "ySus5ZS0b94"
 # Ollama
 # url = "http://localhost:11434/v1/chat/completions"
 # OpenAI
@@ -103,7 +103,7 @@ def summarize_text(input_filename, prompt_selector, output_filename):
                 "content": prompt
             }
         ],
-        "store": True
+        "store": False
     }
 
     api_key = os.getenv("OPENAI_API_KEY")
