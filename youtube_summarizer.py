@@ -125,3 +125,20 @@ class YouTubeSummarizer:
         self.summary_text = self.summarize_text(self.transcript_text, "summary")
         self.title_text = self.summarize_text(self.summary_text, "title")
         self.write_final_summary()
+        
+    def jsonSummary(self):
+        """
+        Returns a JSON string with fields language, title and summary.
+        """
+        if not self.summary_text or not self.title_text:
+            self.fetch_transcript()
+            self.summary_text = self.summarize_text(self.transcript_text, "summary")
+            self.title_text = self.summarize_text(self.summary_text, "title")
+            
+        summary_dict = {
+            "language": self.language,
+            "title": self.title_text,
+            "summary": self.summary_text
+        }
+        
+        return json.dumps(summary_dict)
