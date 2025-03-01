@@ -1,3 +1,29 @@
 /.idea/
 .env
 *.iml
+
+# Python virtual environment
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local data and generated files
+youtube-transcript.db
+final-summary.md
+*.json
+out/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# AWS Lambda package
+youtube_summarizer_lambda.zip
+deployment/
+
+# Large PDF files
+*.pdf
