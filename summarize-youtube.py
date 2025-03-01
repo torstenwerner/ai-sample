@@ -5,6 +5,6 @@
 from youtube_summarizer import YouTubeSummarizer
 
 # specify YouTube video id
-summarizer = YouTubeSummarizer("lAIVJxXoc_Q")
+summarizer = YouTubeSummarizer("puXMr_zbmek")
 summarizer.summarize()
 #print(summarizer.jsonSummary())

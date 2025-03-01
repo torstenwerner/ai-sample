@@ -49,7 +49,6 @@ class YouTubeSummarizer:
         self.summary_text = None
         self.title_text = None
         self.target_dir = os.environ["TARGET_DIRECTORY"]
-        self.logger = logging.getLogger("YouTubeSummarizer")
 
     def open_database(self):
         db_path = f"{self.target_dir}/youtube-transcript.db"
