@@ -48,9 +48,12 @@ class YouTubeSummarizer:
         self.transcript_text = None
         self.summary_text = None
         self.title_text = None
+        self.target_dir = os.environ["TARGET_DIRECTORY"]
+        self.logger = logging.getLogger("YouTubeSummarizer")
 
     def open_database(self):
-        self.conn = sqlite3.connect('youtube-transcript.db')
+        db_path = f"{self.target_dir}/youtube-transcript.db"
+        self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS transcript (
@@ -114,7 +117,9 @@ class YouTubeSummarizer:
 
     def write_final_summary(self):
         full_summary = f"# Summarizing YouTube videos\n\nvideo URL: https://www.youtube.com/watch?v={self.video_id}\n\n## Title\n\n{self.title_text}\n\n## Summary\n\n{self.summary_text}"
-        with open("final-summary.md", "w") as final_summary_file:
+
+        output_path = f"{self.target_dir}/final-summary.md"
+        with open(output_path, "w") as final_summary_file:
             final_summary_file.write(full_summary)
 
     def summarize(self):
@@ -125,20 +130,17 @@ class YouTubeSummarizer:
         self.summary_text = self.summarize_text(self.transcript_text, "summary")
         self.title_text = self.summarize_text(self.summary_text, "title")
         self.write_final_summary()
-        
+
     def jsonSummary(self):
         """
         Returns a JSON string with fields language, title and summary.
         """
-        if not self.summary_text or not self.title_text:
-            self.fetch_transcript()
-            self.summary_text = self.summarize_text(self.transcript_text, "summary")
-            self.title_text = self.summarize_text(self.summary_text, "title")
-            
+        self.summarize()
+
         summary_dict = {
             "language": self.language,
             "title": self.title_text,
             "summary": self.summary_text
         }
-        
+
         return json.dumps(summary_dict)
