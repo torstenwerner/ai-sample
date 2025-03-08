@@ -1,6 +1,13 @@
-### Simple openai test with external file
+### openai API with unstructured response
 POST https://api.openai.com/v1/chat/completions
 Content-Type: application/json
 Authorization: Bearer {{OPENAI_API_KEY}}
 
 < ./02-openai-api-01.json
+
+### openai API with json_object response
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{OPENAI_API_KEY}}
+
+< ./02-openai-api-02.json
