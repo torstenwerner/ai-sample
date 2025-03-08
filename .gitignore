@@ -1,6 +1,7 @@
 /.idea/
 .env
 *.iml
+http-client.private.env.json
 
 # Python virtual environment
 venv/
@@ -13,7 +14,6 @@ __pycache__/
 # Local data and generated files
 youtube-transcript.db
 final-summary.md
-*.json
 out/
 
 # Distribution / packaging

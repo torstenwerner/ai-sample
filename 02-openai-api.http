@@ -1,0 +1,6 @@
+### Simple openai test with external file
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{OPENAI_API_KEY}}
+
+< ./02-openai-api-01.json

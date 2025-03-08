@@ -82,7 +82,8 @@ class YouTubeSummarizer:
                 self.language = transcript.language_code
                 entries = transcript.fetch()
                 self.transcript_text = " ".join(entry["text"] for entry in entries)
-                self.cursor.execute("INSERT INTO transcript VALUES (?, ?, ?)", (self.video_id, self.language, self.transcript_text))
+                self.cursor.execute("INSERT INTO transcript VALUES (?, ?, ?)",
+                                    (self.video_id, self.language, self.transcript_text))
                 self.conn.commit()
             else:
                 raise Exception("transcript not found")
@@ -92,12 +93,14 @@ class YouTubeSummarizer:
         prefix = self.prompts[self.language][prompt_selector]
         prompt = f":{prefix}\n\n{input_text}"
 
+        label_request = " After the summary list 3 labels that categorizes the text." if prompt_selector == "summary" else ""
+
         request = {
             "model": self.model,
             "messages": [
                 {
                     "role": "developer",
-                    "content": "You are summarizing video transcripts. You answer with the summary only and do not mention the source."
+                    "content": f"You are summarizing video transcripts. You answer with the summary only and do not mention the source.{label_request}"
                 },
                 {
                     "role": "user",
