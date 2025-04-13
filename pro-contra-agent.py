@@ -18,8 +18,6 @@ SESSION_ID = "session_01"
 GEMINI_MODEL = "gemini-2.0-flash"
 
 # --- State Keys ---
-# STATE_STATEMENT = "SQL databases are better than NoSQL databases."
-STATE_STATEMENT = "The Python programming language is better suited for writing AI code than JavaScript"
 STATE_PRO = "supporting_arguments"
 STATE_CONTRA = "opposing_arguments"
 
@@ -27,9 +25,9 @@ pro_agent = LlmAgent(
     name="ProAgent",
     model=GEMINI_MODEL,
     instruction=f"""
-    You are a participant in a discussion.
+    You are a participant in a discussion started by the user.
     Check the session state for key '{STATE_PRO}'.
-    If '{STATE_PRO}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are in favour of the statement in state key '{STATE_STATEMENT}'.
+    If '{STATE_PRO}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are in favour of the statement provided by the user.
     If the session key '{STATE_PRO}' *already exists*, update it to contradict the opposing arguments in '{STATE_CONTRA}'."
     Output *only* the story or the exact pass-through message.
     """,
@@ -43,9 +41,9 @@ critic_agent = LlmAgent(
     model=GEMINI_MODEL,
     instruction=f"""
     You are a participant in a discussion.
-    You are against the statement in state key '{STATE_STATEMENT}' and against the supporting arguments in state key '{STATE_PRO}'.
+    You are against the statement provided by the user and against the supporting arguments in state key '{STATE_PRO}'.
     Check the session state for key '{STATE_CONTRA}'.
-    If '{STATE_CONTRA}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are against of the statement in state key '{STATE_STATEMENT}' and against the supporting arguments in state key '{STATE_PRO}'.
+    If '{STATE_CONTRA}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are against the statement provided by the user and against the supporting arguments in state key '{STATE_PRO}'.
     If the session key '{STATE_CONTRA}' *already exists*, update '{STATE_CONTRA}' to oppose the supporting arguments in state key '{STATE_PRO}'.
     Output *only* the story or the exact pass-through message.
     """,
@@ -73,5 +71,9 @@ async def call_agent(query):
             final_response = event.content.parts[0].text.strip()
             print(f"{event.author}: {final_response}", end="\n\n")
 
-print(f"Statement: {STATE_STATEMENT}", end="\n\n")
-asyncio.run(call_agent("execute"))
+# STATEMENT = "SQL databases are better than NoSQL databases."
+# STATEMENT = "The Python programming language is better suited for writing AI code than JavaScript"
+STATEMENT = "A git monorepo simplifies the maintenance of large software projects."
+
+print(f"Statement: {STATEMENT}", end="\n\n")
+asyncio.run(call_agent(STATEMENT))
