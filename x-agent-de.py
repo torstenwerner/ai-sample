@@ -1,11 +1,14 @@
 import asyncio
+from typing import AsyncGenerator
 
 from dotenv import load_dotenv
+from google.adk.agents import BaseAgent
+from google.adk.agents.invocation_context import InvocationContext
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.loop_agent import LoopAgent
+from google.adk.events import Event, EventActions
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.tools import ToolContext, FunctionTool
 from google.genai import types
 
 # Load environment variables from .env file
@@ -37,14 +40,6 @@ writer_agent = LlmAgent(
     output_key=STATE_CURRENT_DOC  # Saves output to state
 )
 
-
-def stop_tool(tool_context: ToolContext) -> None:
-    """Wird immer dann aufgerufen, wenn es keine Kritik gibt."""
-    # print("Stopping tool called.")
-    tool_context.actions.escalate = True
-
-# escalation_tool = FunctionTool(func=stop_tool)
-
 # Critic Agent (LlmAgent)
 critic_agent = LlmAgent(
     name="CriticAgent",
@@ -54,17 +49,26 @@ critic_agent = LlmAgent(
     Bewerte den Kommentar für X.com, das im Session-State-Key '{STATE_CURRENT_DOC}' bereitgestellt wird und der sowohl kritisch als auch ironisch auf das Thema '{STATE_INITIAL_TOPIC}' eingehen soll.
     Verwende nicht die Wörter: Dividende, Finanzmärkte oder Shareholder.
     Gib 1-2 kurze Verbesserungsvorschläge (z.B. "Gestalte es spannender", "Füge mehr Details hinzu").
-    Rufe das Tool 'stop_tool' auf, wenn es keine Kritik gibt.
-    Gib ansonsten *nur* die Kritik aus.
+    Gib *nur* die Kritik aus oder *nur* das Wort 'STOP', wenn es keine Kritik gibt.
     """,
     description="Begutachtet den aktuellen Kommentarentwurf.",
-    output_key=STATE_CRITICISM,  # Saves critique to state
-    tools=[stop_tool]
+    output_key=STATE_CRITICISM  # Saves critique to state
 )
+
+
+class CheckCondition(BaseAgent):  # Custom agent to check state
+    def __init__(self):
+        super().__init__(name="CheckCondition")
+
+    async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
+        status = ctx.session.state.get(STATE_CRITICISM, "pending").strip()
+        is_done = (status == "STOP")
+        yield Event(author=self.name, actions=EventActions(escalate=is_done))  # Escalate if done
+
 
 # Create the LoopAgent
 loop_agent = LoopAgent(
-    name="LoopAgent", sub_agents=[writer_agent, critic_agent], max_iterations=10
+    name="LoopAgent", sub_agents=[writer_agent, critic_agent, CheckCondition()], max_iterations=10
 )
 
 # Session and Runner
@@ -79,9 +83,7 @@ async def call_agent(query):
     events = runner.run_async(user_id=USER_ID, session_id=SESSION_ID, new_message=content)
 
     async for event in events:
-        # if event.actions.escalate:
-        #     print("escalate")
-        if event.is_final_response():
+        if event.content is not None and event.is_final_response():
             final_response = event.content.parts[0].text.strip()
             print("Agenten-Antwort: ", final_response, end="\n\n")
 
