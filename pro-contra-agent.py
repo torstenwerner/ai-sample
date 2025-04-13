@@ -35,8 +35,8 @@ pro_agent = LlmAgent(
     output_key=STATE_PRO
 )
 
-# Critic Agent (LlmAgent)
-critic_agent = LlmAgent(
+# Contra Agent (LlmAgent)
+contra_agent = LlmAgent(
     name="ContraAgent",
     model=GEMINI_MODEL,
     instruction=f"""
@@ -53,7 +53,7 @@ critic_agent = LlmAgent(
 
 # Create the LoopAgent
 loop_agent = LoopAgent(
-    name="LoopAgent", sub_agents=[pro_agent, critic_agent], max_iterations=5
+    name="LoopAgent", sub_agents=[pro_agent, contra_agent], max_iterations=5
 )
 
 # Session and Runner
