@@ -1,3 +1,14 @@
-requests
-python-dotenv
-youtube-transcript-api
+requests~=2.32.3
+python-dotenv~=1.0.1
+youtube-transcript-api~=0.6.3
+click~=8.1.8
+certifi~=2025.1.31
+typing_extensions~=4.12.2
+urllib3~=2.3.0
+cryptography~=44.0.2
+idna~=3.10
+charset-normalizer~=3.4.1
+dotenv~=0.9.9
+defusedxml~=0.7.1
+protobuf~=5.29.4
+PyPDF2~=3.0.1
