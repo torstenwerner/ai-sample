@@ -29,6 +29,7 @@ pro_agent = LlmAgent(
     Check the session state for key '{STATE_PRO}'.
     If '{STATE_PRO}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are in favour of the statement provided by the user.
     If the session key '{STATE_PRO}' *already exists*, update it to contradict the opposing arguments in '{STATE_CONTRA}'."
+    Don't repeat the same arguments that have already been discussed earlier.
     Output *only* the story or the exact pass-through message.
     """,
     description="Writes the supporting arguments.",
@@ -45,6 +46,7 @@ contra_agent = LlmAgent(
     Check the session state for key '{STATE_CONTRA}'.
     If '{STATE_CONTRA}' does NOT exist or is empty, write a few (1-2 sentence) arguments that are against the statement provided by the user and against the supporting arguments in state key '{STATE_PRO}'.
     If the session key '{STATE_CONTRA}' *already exists*, update '{STATE_CONTRA}' to oppose the supporting arguments in state key '{STATE_PRO}'.
+    Don't repeat the same arguments that have already been discussed earlier.
     Output *only* the story or the exact pass-through message.
     """,
     description="Writes the opposing arguments.",
@@ -73,7 +75,12 @@ async def call_agent(query):
 
 # STATEMENT = "SQL databases are better than NoSQL databases."
 # STATEMENT = "The Python programming language is better suited for writing AI code than JavaScript"
-STATEMENT = "A git monorepo simplifies the maintenance of large software projects."
+# STATEMENT = "A git monorepo simplifies the maintenance of large software projects."
+# STATEMENT = "Gemini is better than OpenAI for software development."
+# STATEMENT = "AWS is better than GCP for less experienced developers."
+# STATEMENT = "Idea IntelliJ is more powerful than VS Code."
+#STATEMENT = "A collection of comprehensive software development rules in better than a large software architecture documentation."
+STATEMENT = "OkHTTP is better suited for smaller not so complex project than Apache HTTP client."
 
 print(f"Statement: {STATEMENT}", end="\n\n")
 asyncio.run(call_agent(STATEMENT))
