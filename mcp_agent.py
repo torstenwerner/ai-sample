@@ -35,7 +35,8 @@ async def get_agent_async():
     tools, exit_stack = await get_tools_async()
     # print(f"Fetched {len(tools)} tools from MCP server.")
     root_agent = LlmAgent(
-        model='gemini-2.0-flash',
+        # model='gemini-2.0-flash',
+        model='gemini-2.5-flash-preview-04-17',
         name='filesystem_assistant',
         instruction='Help user interact with the local filesystem using available tools.',
         tools=tools,

@@ -15,7 +15,8 @@ APP_NAME = "discussion_app"
 USER_ID = "user_01"
 SESSION_ID = "session_01"
 # GEMINI_MODEL = "gemini-2.0-flash-exp" # small rate limit
-GEMINI_MODEL = "gemini-2.0-flash"
+# GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-2.5-flash-preview-04-17"
 
 # --- State Keys ---
 STATE_PRO = "supporting_arguments"
