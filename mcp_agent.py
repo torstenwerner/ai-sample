@@ -44,6 +44,36 @@ async def get_agent_async():
     return root_agent, exit_stack
 
 
+async def run_agent(runner, session):
+    # query = "Analyze what kind of software project is in the first folder that you can access."
+    while True:
+        query = input("You: ")
+        if not query.strip():
+            print("Exiting interactive session.")
+            break
+
+        content = types.Content(role='user', parts=[types.Part(text=query)])
+
+        events_async = runner.run_async(
+            session_id=session.id, user_id=session.user_id, new_message=content
+        )
+
+        async for event in events_async:
+            if event.is_final_response():
+                final_response = event.content.parts[0].text.strip()
+                print(f"final_response: {final_response}")
+            else:
+                for part in event.content.parts:
+                    if part.text:
+                        print(f"text: {part.text.strip()}")
+                    elif part.function_call:
+                        print(f"function_call: name={part.function_call.name} args={part.function_call.args}")
+                    elif part.function_response and part.function_response.response['result']:
+                        print(f"function_response: isError={part.function_response.response['result'].isError}")
+                    else:
+                        print(part)
+
+
 async def async_main():
     session_service = InMemorySessionService()
     # Artifact service might not be needed for this example
@@ -52,10 +82,6 @@ async def async_main():
     session = session_service.create_session(
         state={}, app_name='mcp_filesystem_app', user_id='user_fs'
     )
-
-    query = "Analyze what kind of software project is in the first folder that your are allowed to access."
-    # print(f"User Query: '{query}'")
-    content = types.Content(role='user', parts=[types.Part(text=query)])
 
     root_agent, exit_stack = await get_agent_async()
 
@@ -66,24 +92,7 @@ async def async_main():
         session_service=session_service,
     )
 
-    events_async = runner.run_async(
-        session_id=session.id, user_id=session.user_id, new_message=content
-    )
-
-    async for event in events_async:
-        if event.is_final_response():
-            final_response = event.content.parts[0].text.strip()
-            print(f"final_response: {final_response}")
-        else:
-            for part in event.content.parts:
-                if part.text:
-                    print(f"text: {part.text.strip()}")
-                elif part.function_call:
-                    print(f"function_call: name={part.function_call.name} args={part.function_call.args}")
-                elif part.function_response and part.function_response.response['result']:
-                    print(f"function_response: isError={part.function_response.response['result'].isError}")
-                else:
-                    print(part)
+    await run_agent(runner, session)
 
     # Crucial Cleanup: Ensure the MCP server process connection is closed.
     await exit_stack.aclose()
