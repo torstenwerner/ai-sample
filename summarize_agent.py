@@ -14,8 +14,10 @@ load_dotenv()
 
 
 def fetch_file_by_name(filename: str, tool_context: ToolContext):
-    """Fetches a file by filename and adds it to the user prompt.
-        Args:
+    """
+    Fetches a file by filename and adds it as an artifact with the name 'input_file'.
+
+    Args:
         filename (str): The name of the file to fetch from the filesystem
     """
     with open(filename, "rb") as f:
@@ -29,7 +31,10 @@ def fetch_file_by_name(filename: str, tool_context: ToolContext):
 
 
 def append_file_to_user_prompt(callback_context: CallbackContext):
-    """Callback that adds the artifact to the user prompt."""
+    """
+    Callback that adds the artifact with the name 'input_file' to the user prompt.
+    It is preparing the user prompt for the summarizer agent.
+    """
     file_artifact = callback_context.load_artifact("input_file")
     callback_context.user_content.parts.append(file_artifact)
 
@@ -49,14 +54,16 @@ async def get_summarizer_agent():
     )
 
 
-async def get_agent_async():
-    """Creates an ADK Agent equipped with tools from the MCP Server."""
+async def get_root_agent_async():
+    """
+    Creates an ADK Agent that fetches a file and summarizes it..
+    """
     return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
         name='filesystem_assistant',
         instruction="""
         You are summarizing the content of a single file that is specified by the user.
-        1. Fetch the file by its filename using the tool fetch_file_by_name that will add the file content to the user prompt.
+        1. Fetch the file by its filename using the tool fetch_file_by_name.
         2. Transfer control to the summarizer agent.
         """,
         tools=[FunctionTool(fetch_file_by_name)],
@@ -102,7 +109,7 @@ async def async_main():
         state={}, app_name='mcp_filesystem_app', user_id='user_fs'
     )
 
-    root_agent = await get_agent_async()
+    root_agent = await get_root_agent_async()
 
     runner = Runner(
         app_name='mcp_filesystem_app',
