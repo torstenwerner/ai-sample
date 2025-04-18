@@ -9,7 +9,7 @@ load_dotenv()
 
 def generate():
     client = genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY"),
+        api_key=os.environ.get("GOOGLE_API_KEY"),
     )
 
     # model = "gemma-3-27b-it"
