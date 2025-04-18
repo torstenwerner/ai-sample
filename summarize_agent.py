@@ -2,6 +2,7 @@ import asyncio
 import mimetypes
 
 from dotenv import load_dotenv
+from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
 from google.adk.runners import Runner
@@ -12,7 +13,7 @@ from google.genai import types
 load_dotenv()
 
 
-async def fetch_file_by_name(filename: str, tool_context: ToolContext):
+def fetch_file_by_name(filename: str, tool_context: ToolContext):
     """Fetches a file by filename and adds it to the user prompt.
         Args:
         filename (str): The name of the file to fetch from the filesystem
@@ -24,22 +25,43 @@ async def fetch_file_by_name(filename: str, tool_context: ToolContext):
         data=file_content,
         mime_type=mime_type,
     )
-    tool_context.user_content.parts.append(file_artifact)
+    tool_context.save_artifact("input_file", file_artifact)
+
+
+def append_file_to_user_prompt(callback_context: CallbackContext):
+    """Callback that adds the artifact to the user prompt."""
+    file_artifact = callback_context.load_artifact("input_file")
+    callback_context.user_content.parts.append(file_artifact)
+
+
+async def get_summarizer_agent():
+    """
+    Creates an ADK Agent that summarizes a file in the user prompt.
+    The file is added to the user prompt by a callback.
+    """
+    return LlmAgent(
+        model='gemini-2.5-flash-preview-04-17',
+        name='summarizer',
+        instruction="""
+        You are summarizing the content of a single file that is specified by the user.
+        """,
+        before_agent_callback=append_file_to_user_prompt,
+    )
 
 
 async def get_agent_async():
     """Creates an ADK Agent equipped with tools from the MCP Server."""
-    root_agent = LlmAgent(
+    return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
         name='filesystem_assistant',
         instruction="""
         You are summarizing the content of a single file that is specified by the user.
         1. Fetch the file by its filename using the tool fetch_file_by_name that will add the file content to the user prompt.
-        2. Summarize the file content.
+        2. Transfer control to the summarizer agent.
         """,
-        tools=[FunctionTool(fetch_file_by_name)]
+        tools=[FunctionTool(fetch_file_by_name)],
+        sub_agents=[await get_summarizer_agent()]
     )
-    return root_agent
 
 
 async def run_agent(runner, session):
