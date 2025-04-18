@@ -11,10 +11,9 @@ from google.genai import types
 load_dotenv()
 
 
-async def get_tools_async():
+async def get_filesystem_tools_async():
     """Gets tools from the File System MCP Server."""
-    # print("Attempting to connect to MCP Filesystem server...")
-    tools, exit_stack = await MCPToolset.from_server(
+    return await MCPToolset.from_server(
         connection_params=StdioServerParameters(
             command='npx',
             args=["-y",
@@ -22,26 +21,34 @@ async def get_tools_async():
                   "danielsuguimoto/readonly-filesystem-mcp",
                   "."],
         )
-        # For remote servers, you would use SseServerParams instead:
-        # connection_params=SseServerParams(url="http://remote-server:port/path", headers={...})
     )
-    # MCP requires maintaining a connection to the local MCP Server.
-    # exit_stack manages the cleanup of this connection.
-    return tools, exit_stack
+
+
+async def get_jetbrains_tools_async():
+    """Gets tools from the Jetbrains MCP Server."""
+    return await MCPToolset.from_server(
+        connection_params=StdioServerParameters(
+            command='npx',
+            args=["-y",
+                  "@jetbrains/mcp-proxy"],
+        )
+    )
 
 
 async def get_agent_async():
     """Creates an ADK Agent equipped with tools from the MCP Server."""
-    tools, exit_stack = await get_tools_async()
-    # print(f"Fetched {len(tools)} tools from MCP server.")
+    tools_filesystem, exit_stack_filesystem = await get_filesystem_tools_async()
+    tools_jetbrains, exit_stack_jetbrains = await get_jetbrains_tools_async()
     root_agent = LlmAgent(
         # model='gemini-2.0-flash',
         model='gemini-2.5-flash-preview-04-17',
         name='filesystem_assistant',
-        instruction='Help user interact with the local filesystem using available tools.',
-        tools=tools,
+        instruction='Help user interact with the local filesystem and the Jetbrains IDE using available tools.',
+        # tools=tools_filesystem + tools_jetbrains,
+        # tools=tools_jetbrains,
+        tools=tools_filesystem,
     )
-    return root_agent, exit_stack
+    return root_agent, exit_stack_filesystem, exit_stack_jetbrains
 
 
 async def run_agent(runner, session):
@@ -83,7 +90,7 @@ async def async_main():
         state={}, app_name='mcp_filesystem_app', user_id='user_fs'
     )
 
-    root_agent, exit_stack = await get_agent_async()
+    root_agent, exit_stack_filesystem, exit_stack_jetbrains = await get_agent_async()
 
     runner = Runner(
         app_name='mcp_filesystem_app',
@@ -95,7 +102,8 @@ async def async_main():
     await run_agent(runner, session)
 
     # Crucial Cleanup: Ensure the MCP server process connection is closed.
-    await exit_stack.aclose()
+    await exit_stack_filesystem.aclose()
+    await exit_stack_jetbrains.aclose()
 
 
 if __name__ == '__main__':
