@@ -30,27 +30,26 @@ def fetch_file_by_name(filename: str, tool_context: ToolContext):
     tool_context.save_artifact("input_file", file_artifact)
 
 
-def append_file_to_user_prompt(callback_context: CallbackContext):
+def set_user_prompt(callback_context: CallbackContext):
     """
-    Callback that adds the artifact with the name 'input_file' to the user prompt.
-    It is preparing the user prompt for the summarizer agent.
+    Callback that sets the artifact with the name 'input_file' as the user prompt for the summarizer agent.
     """
     file_artifact = callback_context.load_artifact("input_file")
-    callback_context.user_content.parts.append(file_artifact)
+    callback_context.user_content.parts = [file_artifact]
 
 
 async def get_summarizer_agent():
     """
     Creates an ADK Agent that summarizes a file in the user prompt.
-    The file is added to the user prompt by a callback.
+    The file is set as the user prompt by a callback.
     """
     return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
         name='summarizer',
         instruction="""
-        You are summarizing the content of a single file that is specified by the user.
+        You are summarizing the content of a single file that is provided by the user.
         """,
-        before_agent_callback=append_file_to_user_prompt,
+        before_agent_callback=set_user_prompt
     )
 
 
@@ -65,6 +64,8 @@ async def get_root_agent_async():
         You are summarizing the content of a single file that is specified by the user.
         1. Fetch the file by its filename using the tool fetch_file_by_name.
         2. Transfer control to the summarizer agent.
+        
+        Fetch the file again if the user specifies a new filename.
         """,
         tools=[FunctionTool(fetch_file_by_name)],
         sub_agents=[await get_summarizer_agent()]
