@@ -1,4 +1,5 @@
 import asyncio
+import json
 import mimetypes
 
 from dotenv import load_dotenv
@@ -11,15 +12,20 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.tools import ToolContext, FunctionTool
 from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
+
+class FileTaskInput(BaseModel):
+    filename: str = Field(description="The name of the file to fetch from the filesystem.")
 
 def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     """
     Callback that reads the file and sets the user prompt for the model accordingly.
     """
-    filename = callback_context.user_content.parts[0].text
+    args = callback_context.user_content.parts[0].text
+    filename = json.loads(args)["filename"]
     try:
         with open(filename, "rb") as f:
             file_content = f.read()
@@ -35,7 +41,7 @@ def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     llm_request.contents[0].parts = [file_artifact]
 
 
-def get_summarizer_agent():
+def get_file_agent():
     """
     Creates an ADK Agent that summarizes a file in the user prompt.
     """
@@ -46,6 +52,7 @@ def get_summarizer_agent():
         instruction="""
         Summarize the content of a single file that is provided by the user.
         """,
+        input_schema=FileTaskInput,
         before_model_callback=set_user_prompt
     )
 
@@ -60,8 +67,8 @@ async def summarize_file_by_name(filename: str, tool_context: ToolContext):
     Returns:
         str: The summarized content
     """
-    summarizer_tool = AgentTool(get_summarizer_agent())
-    summarizer_output = await summarizer_tool.run_async(args={"request": filename}, tool_context=tool_context)
+    summarizer_tool = AgentTool(get_file_agent())
+    summarizer_output = await summarizer_tool.run_async(args={"filename": filename}, tool_context=tool_context)
     return summarizer_output
 
 
