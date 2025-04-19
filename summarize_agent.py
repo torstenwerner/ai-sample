@@ -38,7 +38,7 @@ def set_user_prompt(callback_context: CallbackContext):
     callback_context.user_content.parts = [file_artifact]
 
 
-async def get_summarizer_agent():
+def get_summarizer_agent():
     """
     Creates an ADK Agent that summarizes a file in the user prompt.
     The file is set as the user prompt by a callback.
@@ -53,7 +53,7 @@ async def get_summarizer_agent():
     )
 
 
-async def get_root_agent_async():
+def get_root_agent():
     """
     Creates an ADK Agent that fetches a file and summarizes it..
     """
@@ -68,7 +68,7 @@ async def get_root_agent_async():
         Fetch the file again if the user specifies a new filename.
         """,
         tools=[FunctionTool(fetch_file_by_name)],
-        sub_agents=[await get_summarizer_agent()]
+        sub_agents=[get_summarizer_agent()]
     )
 
 
@@ -110,7 +110,7 @@ async def async_main():
         state={}, app_name='mcp_filesystem_app', user_id='user_fs'
     )
 
-    root_agent = await get_root_agent_async()
+    root_agent = get_root_agent()
 
     runner = Runner(
         app_name='mcp_filesystem_app',
