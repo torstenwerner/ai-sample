@@ -60,16 +60,16 @@ def get_file_agent():
     )
 
 
-async def summarize_file_by_name(filename: str, user_prompt: str, tool_context: ToolContext):
+async def execute_task_on_file_by_name(filename: str, user_prompt: str, tool_context: ToolContext):
     """
-    Fetches a file by filename and summarizes its content.
+    Fetches a file by filename and executes a task on it.
 
     Args:
         filename (str): The name of the file to fetch from the filesystem
         user_prompt (str): What the user wants to do with this file.
 
     Returns:
-        str: The summarized content
+        str: The output of the tasks
     """
     agent_tool = AgentTool(get_file_agent())
     agent_output = await agent_tool.run_async(
@@ -88,7 +88,7 @@ async def get_root_agent():
         instruction="""
         You are a helpful assistent that answers the user's questions.
         """,
-        tools=[FunctionTool(summarize_file_by_name)],
+        tools=[FunctionTool(execute_task_on_file_by_name)],
     )
 
 
