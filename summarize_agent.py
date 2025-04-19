@@ -19,13 +19,15 @@ load_dotenv()
 
 class FileTaskInput(BaseModel):
     filename: str = Field(description="The name of the file to fetch from the filesystem.")
+    user_prompt: str = Field(description="What the user wants to do with this file.")
+
 
 def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     """
     Callback that reads the file and sets the user prompt for the model accordingly.
     """
-    args = callback_context.user_content.parts[0].text
-    filename = json.loads(args)["filename"]
+    args = json.loads(callback_context.user_content.parts[0].text)
+    filename = args["filename"]
     try:
         with open(filename, "rb") as f:
             file_content = f.read()
@@ -38,38 +40,42 @@ def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
         data=file_content,
         mime_type=mime_type,
     )
-    llm_request.contents[0].parts = [file_artifact]
+    user_prompt = types.Part.from_text(text=args["user_prompt"])
+    llm_request.contents[0].parts = [user_prompt, file_artifact]
 
 
 def get_file_agent():
     """
-    Creates an ADK Agent that summarizes a file in the user prompt.
+    Creates an ADK Agent that executes a task defined by the user on a file provided by the user.
     """
     return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
-        name='summarizer',
-        description="Summarizes a file provided by the user",
+        name='file_agent',
+        description="Executes a task defined by the user on a file provided by the user",
         instruction="""
-        Summarize the content of a single file that is provided by the user.
+        Execute the task defined by the user on the file that is provided by the user.
         """,
         input_schema=FileTaskInput,
         before_model_callback=set_user_prompt
     )
 
 
-async def summarize_file_by_name(filename: str, tool_context: ToolContext):
+async def summarize_file_by_name(filename: str, user_prompt: str, tool_context: ToolContext):
     """
     Fetches a file by filename and summarizes its content.
 
     Args:
         filename (str): The name of the file to fetch from the filesystem
+        user_prompt (str): What the user wants to do with this file.
 
     Returns:
         str: The summarized content
     """
-    summarizer_tool = AgentTool(get_file_agent())
-    summarizer_output = await summarizer_tool.run_async(args={"filename": filename}, tool_context=tool_context)
-    return summarizer_output
+    agent_tool = AgentTool(get_file_agent())
+    agent_output = await agent_tool.run_async(
+        args={"filename": filename, "user_prompt": user_prompt},
+        tool_context=tool_context)
+    return agent_output
 
 
 async def get_root_agent():
