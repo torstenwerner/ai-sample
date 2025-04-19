@@ -1,15 +1,14 @@
 import asyncio
 import mimetypes
-from typing import Dict, Any
 
 from dotenv import load_dotenv
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
-from google.adk.models import LlmRequest
+from google.adk.models import LlmRequest, LlmResponse
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.tools import ToolContext, FunctionTool, BaseTool
+from google.adk.tools import ToolContext, FunctionTool
 from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 
@@ -21,8 +20,13 @@ def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     Callback that reads the file and sets the user prompt for the model accordingly.
     """
     filename = callback_context.user_content.parts[0].text
-    with open(filename, "rb") as f:
-        file_content = f.read()
+    try:
+        with open(filename, "rb") as f:
+            file_content = f.read()
+    except FileNotFoundError:
+        return LlmResponse(content=types.Content(
+            role="model",
+            parts=[types.Part(text=f"The file {filename} was not found.")]))
     mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
     file_artifact = types.Part.from_bytes(
         data=file_content,
@@ -63,14 +67,13 @@ async def summarize_file_by_name(filename: str, tool_context: ToolContext):
 
 async def get_root_agent():
     """
-    Creates an ADK Agent that fetches a file and summarizes it.
+    Creates an Agent that works as an assistent.
     """
     return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
-        name='filesystem_assistant',
+        name='assistant',
         instruction="""
-        You are summarizing the content of a single file that is specified by the user.
-        Fetch the summary of the file identified by its filename using the tool summarize_file_by_name.
+        You are a helpful assistent that answers the user's questions.
         """,
         tools=[FunctionTool(summarize_file_by_name)],
     )
@@ -113,13 +116,13 @@ async def async_main():
     artifacts_service = InMemoryArtifactService()
 
     session = session_service.create_session(
-        state={}, app_name='filesystem_app', user_id='user_fs'
+        state={}, app_name='assistent_app', user_id='user_id'
     )
 
     root_agent = await get_root_agent()
 
     runner = Runner(
-        app_name='filesystem_app',
+        app_name='assistent_app',
         agent=root_agent,
         artifact_service=artifacts_service,  # Optional
         session_service=session_service,
