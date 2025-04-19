@@ -18,7 +18,7 @@ load_dotenv()
 
 def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     """
-    Callback that sets the artifact with the name 'input_file' as the user prompt for the summarizer agent.
+    Callback that reads the file and sets the user prompt for the model accordingly.
     """
     filename = callback_context.user_content.parts[0].text
     with open(filename, "rb") as f:
@@ -56,16 +56,14 @@ async def summarize_file_by_name(filename: str, tool_context: ToolContext):
     Returns:
         str: The summarized content
     """
-    summarizer_agent = get_summarizer_agent()
-    summarizer_tool = AgentTool(summarizer_agent)
-    tool_context.state['INPUT_FILENAME'] = filename
+    summarizer_tool = AgentTool(get_summarizer_agent())
     summarizer_output = await summarizer_tool.run_async(args={"request": filename}, tool_context=tool_context)
     return summarizer_output
 
 
-def get_root_agent():
+async def get_root_agent():
     """
-    Creates an ADK Agent that fetches a file and summarizes it..
+    Creates an ADK Agent that fetches a file and summarizes it.
     """
     return LlmAgent(
         model='gemini-2.5-flash-preview-04-17',
@@ -115,13 +113,13 @@ async def async_main():
     artifacts_service = InMemoryArtifactService()
 
     session = session_service.create_session(
-        state={}, app_name='mcp_filesystem_app', user_id='user_fs'
+        state={}, app_name='filesystem_app', user_id='user_fs'
     )
 
-    root_agent = get_root_agent()
+    root_agent = await get_root_agent()
 
     runner = Runner(
-        app_name='mcp_filesystem_app',
+        app_name='filesystem_app',
         agent=root_agent,
         artifact_service=artifacts_service,  # Optional
         session_service=session_service,
