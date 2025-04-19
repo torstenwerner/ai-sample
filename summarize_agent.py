@@ -16,23 +16,11 @@ from google.genai import types
 load_dotenv()
 
 
-def fetch_file_by_name(filename: str, tool_context: ToolContext):
-    """
-    Fetches a file by filename and adds it as an artifact with the name 'input_file'.
-
-    Args:
-        filename (str): The name of the file to fetch from the filesystem
-    """
-    tool_context.state['INPUT_FILENAME'] = filename
-    return f"The file {filename} was successfully fetched."
-
-
 def set_user_prompt(callback_context: CallbackContext, llm_request: LlmRequest):
     """
     Callback that sets the artifact with the name 'input_file' as the user prompt for the summarizer agent.
     """
-    filename = callback_context.state['INPUT_FILENAME']
-    print(f"filename {filename}")
+    filename = callback_context.user_content.parts[0].text
     with open(filename, "rb") as f:
         file_content = f.read()
     mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
@@ -58,6 +46,23 @@ def get_summarizer_agent():
     )
 
 
+async def summarize_file_by_name(filename: str, tool_context: ToolContext):
+    """
+    Fetches a file by filename and summarizes its content.
+
+    Args:
+        filename (str): The name of the file to fetch from the filesystem
+
+    Returns:
+        str: The summarized content
+    """
+    summarizer_agent = get_summarizer_agent()
+    summarizer_tool = AgentTool(summarizer_agent)
+    tool_context.state['INPUT_FILENAME'] = filename
+    summarizer_output = await summarizer_tool.run_async(args={"request": filename}, tool_context=tool_context)
+    return summarizer_output
+
+
 def get_root_agent():
     """
     Creates an ADK Agent that fetches a file and summarizes it..
@@ -67,12 +72,9 @@ def get_root_agent():
         name='filesystem_assistant',
         instruction="""
         You are summarizing the content of a single file that is specified by the user.
-        1. Fetch the file by its filename using the tool fetch_file_by_name.
-        2. Use the summarizer tool to summarize the content of the file.
-        
-        Fetch the file again if the user specifies a new filename.
+        Fetch the summary of the file identified by its filename using the tool summarize_file_by_name.
         """,
-        tools=[FunctionTool(fetch_file_by_name), AgentTool(get_summarizer_agent())],
+        tools=[FunctionTool(summarize_file_by_name)],
     )
 
 
