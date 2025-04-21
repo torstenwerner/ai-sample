@@ -18,6 +18,12 @@ load_dotenv()
 
 
 class FileTaskInput(BaseModel):
+    """
+    Represents the input required for a file-related task.
+
+    Encapsulate the necessary information for a task involving a file from the filesystem.
+    Provides attributes to specify the file to fetch and the user’s desired action or operation with that file.
+    """
     filename: str = Field(description="The name of the file to fetch from the filesystem.")
     user_prompt: str = Field(description="What the user wants to do with this file.")
 
