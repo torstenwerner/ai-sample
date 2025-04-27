@@ -3,14 +3,15 @@ import asyncio
 import os
 
 from dotenv import load_dotenv
-from google.genai import types
 from google.adk.agents.llm_agent import LlmAgent
+from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService  # Optional
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService # Optional
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseServerParams, StdioServerParameters
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
+from google.genai import types
 
 load_dotenv()
+
 
 async def get_tools_async():
     """ Step 1: Gets tools from the Google Maps MCP Server."""
@@ -32,23 +33,25 @@ async def get_tools_async():
     print("MCP Toolset created successfully.")
     return tools, exit_stack
 
+
 # --- Step 2: Agent Definition ---
 async def get_agent_async():
     """Creates an ADK Agent equipped with tools from the MCP Server."""
     tools, exit_stack = await get_tools_async()
     print(f"Fetched {len(tools)} tools from MCP server.")
     root_agent = LlmAgent(
-        model='gemini-2.0-flash', # Adjust if needed
+        model='gemini-2.0-flash',  # Adjust if needed
         name='maps_assistant',
         instruction='Help user with mapping and directions using available tools.',
         tools=tools,
     )
     return root_agent, exit_stack
 
+
 # --- Step 3: Main Execution Logic (modify query) ---
 async def async_main():
     session_service = InMemorySessionService()
-    artifacts_service = InMemoryArtifactService() # Optional
+    artifacts_service = InMemoryArtifactService()  # Optional
 
     session = session_service.create_session(
         state={}, app_name='mcp_maps_app', user_id='user_maps'
@@ -64,7 +67,7 @@ async def async_main():
     runner = Runner(
         app_name='mcp_maps_app',
         agent=root_agent,
-        artifact_service=artifacts_service, # Optional
+        artifact_service=artifacts_service,  # Optional
         session_service=session_service,
     )
 
@@ -94,6 +97,7 @@ async def async_main():
     print("Closing MCP server connection...")
     await exit_stack.aclose()
     print("Cleanup complete.")
+
 
 if __name__ == '__main__':
     try:
