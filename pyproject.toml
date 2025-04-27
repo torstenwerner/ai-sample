@@ -7,4 +7,6 @@ requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
     "google-adk>=0.3.0",
+    "pypdf2>=3.0.1",
+    "youtube-transcript-api>=1.0.3",
 ]
