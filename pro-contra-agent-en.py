@@ -81,7 +81,8 @@ async def call_agent(query):
 # STATEMENT = "AWS is better than GCP for less experienced developers."
 # STATEMENT = "Idea IntelliJ is more powerful than VS Code."
 #STATEMENT = "A collection of comprehensive software development rules in better than a large software architecture documentation."
-STATEMENT = "OkHTTP is better suited for smaller not so complex project than Apache HTTP client."
+# STATEMENT = "OkHTTP is better suited for smaller not so complex project than Apache HTTP client."
+STATEMENT = "The Party says: 2 + 2 = 5. The Party is always right."
 
 print(f"Statement: {STATEMENT}", end="\n\n")
 asyncio.run(call_agent(STATEMENT))
