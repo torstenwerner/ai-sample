@@ -3,6 +3,7 @@ import dvb_package from "dvbjs";
 const {findStop, route, INode, IPlatform, IRoute, IStopLocation, ITrip} = dvb_package;
 
 /**
+ * Generates and returns the display name for a stop by combining its name and city.
  *
  * @param {IStopLocation} stop
  * @returns {string}
@@ -19,6 +20,7 @@ function stopDisplayName(stop) {
  */
 
 /**
+ * Processes the given stop and returns an object containing relevant stop details.
  *
  * @param {IStopLocation} stop
  * @returns {ISimpleStop}
@@ -42,6 +44,7 @@ function simpleStop(stop) {
  */
 
 /**
+ * Transforms a given node object into a simplified representation.
  *
  * @param {INode} node
  * @returns {ISimpleNode}
@@ -79,6 +82,7 @@ function simpleNodes(nodes) {
  */
 
 /**
+ * Calculates as simplified trip.
  *
  * @param {ITrip} trip
  * @returns {ISimpleTrip}
@@ -101,15 +105,16 @@ function simpleTrip(trip) {
  */
 
 /**
+ * Calculates a simplified route.
  *
- * @param {IRoute} routes
+ * @param {IRoute} route
  * @returns {ISimpleRoute}
  */
-function simpleRoutes(routes) {
+function simpleRoute(route) {
     return {
-        origin: `${routes.origin.name} ${routes.origin.city}`,
-        destination: `${routes.destination.name} ${routes.destination.city}`,
-        trips: routes.trips.map(simpleTrip),
+        origin: `${route.origin.name} ${route.origin.city}`,
+        destination: `${route.destination.name} ${route.destination.city}`,
+        trips: route.trips.map(simpleTrip),
     };
 }
 
@@ -119,6 +124,6 @@ const destination = (await findStop("Riesa Bahnhof"))[0];
 const startTime = new Date();
 const isArrivalTime = false;
 
-const routes = await route(origin.id, destination.id, startTime, isArrivalTime);
+const rawRoute = await route(origin.id, destination.id, startTime, isArrivalTime);
 
-console.dir(simpleRoutes(routes), {depth: 7, maxArrayLength: 10});
+console.dir(simpleRoute(rawRoute), {depth: 7, maxArrayLength: 10});
