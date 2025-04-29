@@ -12,9 +12,16 @@ function stopDisplayName(stop) {
 }
 
 /**
+ * @typedef ISimpleStop
+ * @property {string} stop
+ * @property {IPlatform} platform
+ * @property {Date} time
+ */
+
+/**
  *
  * @param {IStopLocation} stop
- * @returns {{stop: string, platform: IPlatform, time: Date}}
+ * @returns {ISimpleStop}
  */
 function simpleStop(stop) {
     return {
@@ -25,9 +32,19 @@ function simpleStop(stop) {
 }
 
 /**
+ * @typedef ISimpleNode
+ * @property {string} line
+ * @property {string} direction
+ * @property {number} duration
+ * @property {string} mode
+ * @property {ISimpleStop} departure
+ * @property {ISimpleStop} arrival
+ */
+
+/**
  *
  * @param {INode} node
- * @returns {{line: string, direction: string, duration: number, mode: string, departure: {stop: string, platform: IPlatform, time: Date}, arrival: {stop: string, platform: IPlatform, time: Date}}}
+ * @returns {ISimpleNode}
  */
 function simpleNode(node) {
     return {
@@ -44,7 +61,7 @@ function simpleNode(node) {
  * Filters and transforms a list of nodes to a simpler structure, excluding specific modes such as "Footpath" and "StairsUp".
  *
  * @param {INode[]} nodes - An array of node objects, where each node contains route, mode, and stop details.
- * @return {Array} - A simplified array of nodes, including line, direction, duration, mode title, and processed departure and arrival stops.
+ * @return {ISimpleNode[]} - A simplified array of nodes, including line, direction, duration, mode title, and processed departure and arrival stops.
  */
 function simpleNodes(nodes) {
     return nodes
@@ -53,9 +70,18 @@ function simpleNodes(nodes) {
 }
 
 /**
+ * @typedef ISimpleTrip
+ * @property {ISimpleStop} departure
+ * @property {ISimpleStop} arrival
+ * @property {number} duration
+ * @property {number} interchanges
+ * @property {ISimpleNode[]} nodes
+ */
+
+/**
  *
  * @param {ITrip} trip
- * @returns {{departure: {stop: string, platform: IPlatform, time: Date}, arrival: {stop: string, platform: IPlatform, time: Date}, duration: number, interchanges: number, nodes: Array}}
+ * @returns {ISimpleTrip}
  */
 function simpleTrip(trip) {
     return {
@@ -68,9 +94,16 @@ function simpleTrip(trip) {
 }
 
 /**
+ * @typedef ISimpleRoute
+ * @property {string} origin
+ * @property {string} destination
+ * @property {ISimpleTrip[]} trips
+ */
+
+/**
  *
  * @param {IRoute} routes
- * @returns {{origin: string, destination: string, trips: {departure: {stop: string, platform: IPlatform, time: Date}, arrival: {stop: string, platform: IPlatform, time: Date}, duration: *, interchanges: *, nodes: Array}[]}}
+ * @returns {ISimpleRoute}
  */
 function simpleRoutes(routes) {
     return {
