@@ -27,3 +27,6 @@ deployment/
 
 # Large PDF files
 *.pdf
+
+# node js
+node_modules/
